@@ -2,32 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>LiveAtlas Call</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+  <title>LiveAtlas Call</title>
+
+  <!-- Mobile fullscreen support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Remote video (main experience) -->
+  <!-- Remote video (full screen) -->
   <video id="remoteVideo" autoplay playsinline></video>
 
-  <!-- Local video (PiP) -->
+  <!-- Local video (picture-in-picture) -->
   <video id="localVideo" autoplay muted playsinline></video>
 
-  <!-- Status -->
+  <!-- Status text -->
   <div id="status">Connecting…</div>
 
-  <!-- Role label -->
-  <div id="roleTag"></div>
-
-  <!-- Controls -->
-  <div id="controls">
-    <button id="micBtn">Mute</button>
-    <button id="camBtn">Camera Off</button>
-    <button id="endBtn">End</button>
-  </div>
-
+  <!-- Scripts -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>
+
 </body>
 </html>
