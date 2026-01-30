@@ -1,6 +1,7 @@
 {
   "name": "liveatlas",
   "version": "1.0.0",
+  "private": true,
   "description": "LiveAtlas WebRTC Call",
   "main": "server.js",
   "scripts": {
@@ -9,5 +10,8 @@
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.7.5"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
