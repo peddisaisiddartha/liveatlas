@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LiveAtlas – Mobile Camera</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <h2>LiveAtlas – Mobile Camera Test</h2>
+
+  <video
+    id="cam"
+    autoplay
+    muted
+    playsinline
+    style="width:100%;border:2px solid black;">
+  </video>
+
+  <script>
+    const video = document.getElementById("cam");
+
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+      audio: true
+    })
+    .then(stream => {
+      video.srcObject = stream;
+    })
+    .catch(err => {
+      alert("Camera error: " + err.message);
+      console.error(err);
+    });
+  </script>
+</body>
+</html>
