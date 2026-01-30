@@ -1,18 +1,13 @@
 {
-  "name": "liveatlas-pipeline",
+  "name": "liveatlas",
   "version": "1.0.0",
-  "description": "",
+  "description": "LiveAtlas video call",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^5.2.1",
-    "git": "^0.1.5",
-    "socket.io": "^4.8.3"
+    "express": "^4.18.2",
+    "socket.io": "^4.7.5"
   }
 }
