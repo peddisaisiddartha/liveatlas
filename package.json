@@ -1,7 +1,7 @@
 {
   "name": "liveatlas",
   "version": "1.0.0",
-  "description": "LiveAtlas video call",
+  "description": "LiveAtlas WebRTC Call",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

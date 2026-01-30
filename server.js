@@ -8,30 +8,33 @@ const io = new Server(server);
 
 app.use(express.static("public"));
 
-let users = [];
-
-io.on("connection", socket => {
-  users.push(socket.id);
+io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  // assign role
-  socket.emit("role", users.length === 1 ? "caller" : "receiver");
+  socket.on("join-room", (roomId) => {
+    socket.join(roomId);
+    socket.to(roomId).emit("user-joined", socket.id);
+  });
 
-  // notify when both users are present
-  if (users.length === 2) {
-    io.emit("ready");
-  }
+  socket.on("offer", ({ roomId, offer }) => {
+    socket.to(roomId).emit("offer", offer);
+  });
 
-  socket.on("offer", data => socket.broadcast.emit("offer", data));
-  socket.on("answer", data => socket.broadcast.emit("answer", data));
-  socket.on("ice", data => socket.broadcast.emit("ice", data));
+  socket.on("answer", ({ roomId, answer }) => {
+    socket.to(roomId).emit("answer", answer);
+  });
+
+  socket.on("ice-candidate", ({ roomId, candidate }) => {
+    socket.to(roomId).emit("ice-candidate", candidate);
+  });
 
   socket.on("disconnect", () => {
-    users = users.filter(id => id !== socket.id);
     console.log("User disconnected:", socket.id);
   });
 });
 
-server.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
+  console.log(`LiveAtlas server running on port ${PORT}`);
 });
