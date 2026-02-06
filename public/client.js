@@ -64,6 +64,21 @@ socket.on("ice-candidate", async (candidate) => {
 async function createPeer(isCaller) {
   peer = new RTCPeerConnection(rtcConfig);
 
+  // 🔒 Lock video bitrate for better quality
+peer.onnegotiationneeded = async () => {
+  const sender = peer.getSenders().find(
+    s => s.track && s.track.kind === "video"
+  );
+
+  if (sender) {
+    const params = sender.getParameters();
+    if (!params.encodings) params.encodings = [{}];
+
+    params.encodings[0].maxBitrate = 2_500_000; // 2.5 Mbps (720p stable)
+    await sender.setParameters(params);
+  }
+};
+
   localStream.getTracks().forEach((track) => {
     peer.addTrack(track, localStream);
   });
