@@ -1,79 +1,69 @@
 const socket = io();
 
-const params = new URLSearchParams(window.location.search);
-const roomId = params.get("room") || "expo";
-
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
 const statusText = document.getElementById("status");
 
 let localStream;
-let peer;
+let pc;
 
-const rtcConfig = {
+const config = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
 };
 
-async function init() {
+async function start() {
   localStream = await navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
   });
 
   localVideo.srcObject = localStream;
-  socket.emit("join-room", roomId);
+
+  socket.on("ready", async () => {
+    statusText.innerText = "Calling…";
+    await createPeer(true);
+  });
+
+  socket.on("offer", async offer => {
+    statusText.innerText = "Incoming call…";
+    await createPeer(false);
+    await pc.setRemoteDescription(offer);
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    socket.emit("answer", answer);
+  });
+
+  socket.on("answer", async answer => {
+    await pc.setRemoteDescription(answer);
+    statusText.innerText = "Connected";
+  });
+
+  socket.on("ice", async candidate => {
+    if (candidate) await pc.addIceCandidate(candidate);
+  });
 }
 
-socket.on("user-joined", async () => {
-  statusText.innerText = "User joined. Calling…";
-  await createPeer(true);
-});
-
-socket.on("offer", async offer => {
-  statusText.innerText = "Incoming call…";
-  await createPeer(false);
-  await peer.setRemoteDescription(offer);
-  const answer = await peer.createAnswer();
-  await peer.setLocalDescription(answer);
-  socket.emit("answer", { roomId, answer });
-});
-
-socket.on("answer", async answer => {
-  await peer.setRemoteDescription(answer);
-  statusText.innerText = "Connected";
-});
-
-socket.on("ice-candidate", async candidate => {
-  if (candidate) await peer.addIceCandidate(candidate);
-});
-
 async function createPeer(isCaller) {
-  peer = new RTCPeerConnection(rtcConfig);
+  pc = new RTCPeerConnection(config);
 
   localStream.getTracks().forEach(track =>
-    peer.addTrack(track, localStream)
+    pc.addTrack(track, localStream)
   );
 
-  peer.ontrack = e => {
+  pc.ontrack = e => {
     remoteVideo.srcObject = e.streams[0];
   };
 
-  peer.onicecandidate = e => {
-    if (e.candidate) {
-      socket.emit("ice-candidate", {
-        roomId,
-        candidate: e.candidate
-      });
-    }
+  pc.onicecandidate = e => {
+    if (e.candidate) socket.emit("ice", e.candidate);
   };
 
   if (isCaller) {
-    const offer = await peer.createOffer();
-    await peer.setLocalDescription(offer);
-    socket.emit("offer", { roomId, offer });
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    socket.emit("offer", offer);
   }
 }
 
-init().catch(err => {
-  alert("Camera/Mic error: " + err.message);
-});
+start().catch(err => alert(err.message));
