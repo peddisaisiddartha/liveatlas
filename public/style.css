@@ -1,95 +1,46 @@
-/* RESET */
-* {
+html, body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-html, body {
-  width: 100%;
+  background: black;
   height: 100%;
-  background: black;
   overflow: hidden;
-  font-family: Arial, sans-serif;
+  font-family: sans-serif;
 }
 
-/* ROTATE NOTICE */
-#rotateNotice {
-  position: fixed;
-  inset: 0;
-  background: black;
-  color: white;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  z-index: 10000;
-  font-size: 18px;
-  padding: 20px;
-}
-
-@media (orientation: portrait) {
-  #rotateNotice {
-    display: flex;
-  }
-}
-
-/* STATUS TEXT */
-#status {
-  position: fixed;
-  top: 12px;
-  width: 100%;
-  text-align: center;
-  color: white;
-  font-size: 14px;
-  z-index: 5000;
-}
-
-/* REMOTE VIDEO (FULL SCREEN) */
+/* Remote video = full screen */
 #remoteVideo {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
   object-fit: cover;
   background: black;
 }
 
-/* LOCAL VIDEO (PiP) */
+/* Local video = PiP */
 #localVideo {
   position: fixed;
-  bottom: 80px;
-  right: 12px;
+  bottom: 16px;
+  right: 16px;
   width: 120px;
   height: 160px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 2px solid white;
-  z-index: 4000;
   background: black;
+  z-index: 10;
 }
 
-/* CONTROLS */
-#controls {
+#status {
   position: fixed;
-  bottom: 12px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  z-index: 6000;
-}
-
-#controls button {
-  padding: 10px 14px;
-  font-size: 14px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(30, 30, 30, 0.85);
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
   color: white;
-  cursor: pointer;
-}
-
-#controls button:active {
-  transform: scale(0.95);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 20;
 }

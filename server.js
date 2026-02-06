@@ -3,39 +3,45 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
+app.use(express.static("public"));
+
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/call.html");
+});
 const server = http.createServer(app);
 const io = new Server(server);
 
 app.use(express.static("public"));
 
-let users = [];
-
-io.on("connection", socket => {
+io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
-  users.push(socket.id);
 
-  if (users.length === 2) {
-    io.emit("ready");
-  }
-
-  socket.on("offer", offer => {
-    socket.broadcast.emit("offer", offer);
+  socket.on("join-room", (roomId) => {
+    socket.join(roomId);
+    socket.to(roomId).emit("user-joined", socket.id);
   });
 
-  socket.on("answer", answer => {
-    socket.broadcast.emit("answer", answer);
+
+
+  socket.on("offer", ({ roomId, offer }) => {
+    socket.to(roomId).emit("offer", offer);
   });
 
-  socket.on("ice", candidate => {
-    socket.broadcast.emit("ice", candidate);
+  socket.on("answer", ({ roomId, answer }) => {
+    socket.to(roomId).emit("answer", answer);
+  });
+
+  socket.on("ice-candidate", ({ roomId, candidate }) => {
+    socket.to(roomId).emit("ice-candidate", candidate);
   });
 
   socket.on("disconnect", () => {
-    users = users.filter(id => id !== socket.id);
     console.log("User disconnected:", socket.id);
   });
 });
 
-server.listen(process.env.PORT || 3000, () => {
-  console.log("LiveAtlas server running");
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
+  console.log(`LiveAtlas server running on port ${PORT}`);
 });

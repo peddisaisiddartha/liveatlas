@@ -4,66 +4,89 @@ const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
 const statusText = document.getElementById("status");
 
-let localStream;
-let pc;
+const roomId = new URLSearchParams(window.location.search).get("room") || "default";
 
-const config = {
+let localStream;
+let peer;
+
+const rtcConfig = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
 };
 
+window.addEventListener("DOMContentLoaded", start);
+
 async function start() {
-  localStream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: true
-  });
-
-  localVideo.srcObject = localStream;
-
-  socket.on("ready", async () => {
-    statusText.innerText = "Calling…";
-    await createPeer(true);
-  });
-
-  socket.on("offer", async offer => {
-    statusText.innerText = "Incoming call…";
-    await createPeer(false);
-    await pc.setRemoteDescription(offer);
-
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    socket.emit("answer", answer);
-  });
-
-  socket.on("answer", async answer => {
-    await pc.setRemoteDescription(answer);
-    statusText.innerText = "Connected";
-  });
-
-  socket.on("ice", async candidate => {
-    if (candidate) await pc.addIceCandidate(candidate);
-  });
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+  width: { ideal: 1280 },
+  height: { ideal: 720 },
+  frameRate: { ideal: 24 }
 }
+    });
 
-async function createPeer(isCaller) {
-  pc = new RTCPeerConnection(config);
+    localVideo.srcObject = localStream;
+    socket.emit("join-room", roomId);
+    statusText.innerText = "Camera ready";
 
-  localStream.getTracks().forEach(track =>
-    pc.addTrack(track, localStream)
-  );
-
-  pc.ontrack = e => {
-    remoteVideo.srcObject = e.streams[0];
-  };
-
-  pc.onicecandidate = e => {
-    if (e.candidate) socket.emit("ice", e.candidate);
-  };
-
-  if (isCaller) {
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    socket.emit("offer", offer);
+  } catch (err) {
+    console.error(err);
+    statusText.innerText = "Camera permission failed";
   }
 }
 
-start().catch(err => alert(err.message));
+socket.on("user-joined", async () => {
+  statusText.innerText = "User joined. Calling...";
+  await createPeer(true);
+});
+
+socket.on("offer", async ({offer}) => {
+  await createPeer(false);
+  await peer.setRemoteDescription(new
+    RTCSessionDescription(offer));
+
+  const answer = await peer.createAnswer();
+  await peer.setLocalDescription(answer);
+
+  socket.emit("answer", { roomId, answer });
+});
+
+socket.on("answer", async (answer) => {
+  await peer.setRemoteDescription(new
+    RTCSessionDescription(answer));
+});
+
+socket.on("ice-candidate", async (candidate) => {
+  if(peer && candidate){
+  await peer.addIceCandidate(new RTCIceCandidate(candidate));
+  }
+});
+
+async function createPeer(isCaller) {
+  peer = new RTCPeerConnection(rtcConfig);
+
+  localStream.getTracks().forEach(track => {
+    peer.addTrack(track, localStream);
+});
+
+  peer.ontrack = (event) => {
+    remoteVideo.srcObject = event.streams[0];
+  };
+
+  peer.onicecandidate = (event) => {
+    if (event.candidate) {
+      socket.emit("ice-candidate", {
+        roomId,
+        candidate: event.candidate
+      });
+    }
+  };
+
+  if (isCaller) {
+    const offer = await peer.createOffer();
+    await peer.setLocalDescription(offer);
+    socket.emit("offer", { roomId, offer });
+  }
+}
+
+

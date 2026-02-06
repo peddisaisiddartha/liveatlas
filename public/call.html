@@ -4,36 +4,20 @@
   <meta charset="UTF-8" />
   <title>LiveAtlas Call</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
 
-  <!-- ROTATE NOTICE -->
-  <div id="rotateNotice">
-    Please rotate your device to landscape mode for VR viewing
-  </div>
-
-  <!-- STATUS -->
-  <div id="status">Connecting…</div>
-
-  <!-- REMOTE VIDEO (FULL SCREEN) -->
+  <!-- Remote video (FULL SCREEN) -->
   <video id="remoteVideo" autoplay playsinline></video>
 
-  <!-- LOCAL VIDEO (PiP) -->
+  <!-- Local video (PiP) -->
   <video id="localVideo" autoplay muted playsinline></video>
 
-  <!-- CONTROLS -->
-  <div id="controls">
-    <button id="muteBtn">🔇 Mute</button>
-    <button id="camBtn">📷 Camera</button>
-    <button id="fsBtn">⛶ Fullscreen</button>
-    <button id="endBtn">❌ End</button>
-  </div>
+  <div id="status">Connecting…</div>
 
-  <!-- SCRIPTS (ONLY ONCE, ONLY HERE) -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>
-
 </body>
 </html>
