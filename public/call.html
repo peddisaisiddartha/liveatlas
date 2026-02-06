@@ -14,14 +14,14 @@
     Please rotate your device to landscape mode for VR viewing
   </div>
 
-  <!-- REMOTE VIDEO -->
+  <!-- STATUS -->
+  <div id="status">Connecting…</div>
+
+  <!-- REMOTE VIDEO (FULL SCREEN) -->
   <video id="remoteVideo" autoplay playsinline></video>
 
   <!-- LOCAL VIDEO (PiP) -->
   <video id="localVideo" autoplay muted playsinline></video>
-
-  <!-- STATUS -->
-  <div id="status">Connecting...</div>
 
   <!-- CONTROLS -->
   <div id="controls">
@@ -31,7 +31,7 @@
     <button id="endBtn">❌ End</button>
   </div>
 
-  <!-- SCRIPTS (ONLY HERE, ONLY ONCE) -->
+  <!-- SCRIPTS (ONLY ONCE, ONLY HERE) -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>
 

@@ -1,6 +1,4 @@
-/* =========================
-   RESET
-========================= */
+/* RESET */
 * {
   margin: 0;
   padding: 0;
@@ -15,118 +13,83 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
-/* =========================
-   ROTATION NOTICE (VR)
-========================= */
+/* ROTATE NOTICE */
 #rotateNotice {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: black;
   color: white;
   display: none;
   align-items: center;
   justify-content: center;
   text-align: center;
-  z-index: 100000;
+  z-index: 10000;
   font-size: 18px;
   padding: 20px;
 }
 
-/* =========================
-   REMOTE VIDEO (FULL SCREEN)
-========================= */
+@media (orientation: portrait) {
+  #rotateNotice {
+    display: flex;
+  }
+}
+
+/* STATUS TEXT */
+#status {
+  position: fixed;
+  top: 12px;
+  width: 100%;
+  text-align: center;
+  color: white;
+  font-size: 14px;
+  z-index: 5000;
+}
+
+/* REMOTE VIDEO (FULL SCREEN) */
 #remoteVideo {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100vw;
   height: 100vh;
   object-fit: cover;
   background: black;
-  z-index: 1;
 }
 
-/* =========================
-   LOCAL VIDEO (PiP)
-========================= */
+/* LOCAL VIDEO (PiP) */
 #localVideo {
   position: fixed;
-  bottom: 90px;
-  right: 16px;
-  width: 28vw;
-  max-width: 160px;
-  aspect-ratio: 16 / 9;
+  bottom: 80px;
+  right: 12px;
+  width: 120px;
+  height: 160px;
   object-fit: cover;
   border-radius: 10px;
-  border: 2px solid rgba(255,255,255,0.6);
-  z-index: 5;
+  border: 2px solid white;
+  z-index: 4000;
+  background: black;
 }
 
-/* =========================
-   STATUS TEXT
-========================= */
-#status {
-  position: fixed;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.6);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-  z-index: 10;
-}
-
-/* =========================
-   CONTROLS (IMPORTANT PART)
-========================= */
+/* CONTROLS */
 #controls {
   position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 12px;
+  width: 100%;
   display: flex;
+  justify-content: center;
   gap: 12px;
-  z-index: 99999;
+  z-index: 6000;
 }
 
-/* BUTTON STYLE */
 #controls button {
-  background: rgba(0,0,0,0.65);
-  color: white;
-  border: none;
-  padding: 10px 16px;
+  padding: 10px 14px;
   font-size: 14px;
-  border-radius: 22px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(30, 30, 30, 0.85);
+  color: white;
   cursor: pointer;
-  z-index: 99999;
 }
 
 #controls button:active {
   transform: scale(0.95);
-}
-
-/* END BUTTON (RED) */
-#endBtn {
-  background: rgba(200,0,0,0.75);
-}
-
-/* =========================
-   LANDSCAPE ENFORCEMENT
-========================= */
-@media screen and (orientation: portrait) {
-  #rotateNotice {
-    display: flex;
-  }
-
-  #remoteVideo,
-  #localVideo,
-  #controls,
-  #status {
-    display: none;
-  }
 }

@@ -1,98 +1,68 @@
 const socket = io();
 
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get("room") || "expo";
+
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
 const statusText = document.getElementById("status");
 
-const roomId = new URLSearchParams(window.location.search).get("room") || "default";
-
 let localStream;
 let peer;
-let useBackCamera = false;
+
 const rtcConfig = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
 };
 
-window.addEventListener("DOMContentLoaded", start);
+async function init() {
+  localStream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: true
+  });
 
-async function start() {
-  try {
-    localStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: useBackCamera ? {exact: "environment"}: "user",
-  width: { ideal: 1280 },
-  height: { ideal: 720 },
-  frameRate: { ideal: 24 }
-}
-    });
-
-    localVideo.srcObject = localStream;
-    localVideo.style.display = "none";
-    socket.emit("join-room", roomId);
-    statusText.innerText = "Camera ready";
-
-  } catch (err) {
-    console.error(err);
-    statusText.innerText = "Camera permission failed";
-  }
+  localVideo.srcObject = localStream;
+  socket.emit("join-room", roomId);
 }
 
 socket.on("user-joined", async () => {
-  statusText.innerText = "User joined. Calling...";
+  statusText.innerText = "User joined. Calling…";
   await createPeer(true);
 });
 
-socket.on("offer", async ({offer}) => {
+socket.on("offer", async offer => {
+  statusText.innerText = "Incoming call…";
   await createPeer(false);
-  await peer.setRemoteDescription(new
-    RTCSessionDescription(offer));
-
+  await peer.setRemoteDescription(offer);
   const answer = await peer.createAnswer();
   await peer.setLocalDescription(answer);
-
   socket.emit("answer", { roomId, answer });
 });
 
-socket.on("answer", async (answer) => {
-  await peer.setRemoteDescription(new
-    RTCSessionDescription(answer));
+socket.on("answer", async answer => {
+  await peer.setRemoteDescription(answer);
+  statusText.innerText = "Connected";
 });
 
-socket.on("ice-candidate", async (candidate) => {
-  if(peer && candidate){
-  await peer.addIceCandidate(new RTCIceCandidate(candidate));
-  }
+socket.on("ice-candidate", async candidate => {
+  if (candidate) await peer.addIceCandidate(candidate);
 });
 
 async function createPeer(isCaller) {
   peer = new RTCPeerConnection(rtcConfig);
 
+  localStream.getTracks().forEach(track =>
+    peer.addTrack(track, localStream)
+  );
 
-  localStream.getTracks().forEach(track => {
-    peer.addTrack(track, localStream);
-});
-
-peer.getSenders().forEach(sender => {
-  if (sender.track && sender.track.kind === "video") {
-    const params = sender.getParameters();
-    if (!params.encodings) params.encodings = [{}];
-
-    params.encodings[0].maxBitrate = 2500000; // 2.5 Mbps
-    params.encodings[0].priority = "high";
-
-    sender.setParameters(params);
-  }
-});
-
-  peer.ontrack = (event) => {
-    remoteVideo.srcObject = event.streams[0];
+  peer.ontrack = e => {
+    remoteVideo.srcObject = e.streams[0];
   };
 
-  peer.onicecandidate = (event) => {
-    if (event.candidate) {
+  peer.onicecandidate = e => {
+    if (e.candidate) {
       socket.emit("ice-candidate", {
         roomId,
-        candidate: event.candidate
+        candidate: e.candidate
       });
     }
   };
@@ -103,52 +73,7 @@ peer.getSenders().forEach(sender => {
     socket.emit("offer", { roomId, offer });
   }
 }
-document.getElementById("camBtn").onclick = async () => {
-  useBackCamera = !useBackCamera;
 
-  if (localStream) {
-    localStream.getTracks().forEach(t => t.stop());
-  }
-
-  await start();
-};
-// 🔇 MUTE / UNMUTE MIC
-document.getElementById("muteBtn").onclick = () => {
-  if (!localStream) return;
-
-  const audioTrack = localStream.getAudioTracks()[0];
-  if (!audioTrack) return;
-
-  audioTrack.enabled = !audioTrack.enabled;
-  document.getElementById("muteBtn").innerText =
-    audioTrack.enabled ? "🔇 Mute" : "🔊 Unmute";
-};
-
-// 📷 CAMERA ON / OFF
-document.getElementById("camBtn").onclick = () => {
-  if (!localStream) return;
-
-  const videoTrack = localStream.getVideoTracks()[0];
-  if (!videoTrack) return;
-
-  videoTrack.enabled = !videoTrack.enabled;
-  document.getElementById("camBtn").innerText =
-    videoTrack.enabled ? "📷 Camera" : "🚫 Camera Off";
-};
-
-// ❌ END SESSION (SAFE CLOSE)
-document.getElementById("endBtn").onclick = () => {
-  if (localStream) {
-    localStream.getTracks().forEach(t => t.stop());
-  }
-
-  if (peer) {
-    peer.close();
-  }
-
-  statusText.innerText = "Session ended";
-};
-
-document.getElementById("endBtn").onclick = () => {
-  window.location.href = "/";
-};
+init().catch(err => {
+  alert("Camera/Mic error: " + err.message);
+});

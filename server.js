@@ -3,13 +3,14 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
-app.use(express.static("public"));
-
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/call.html");
-});
 const server = http.createServer(app);
-const io = new Server(server);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*", // required for Render + mobile
+    methods: ["GET", "POST"]
+  }
+});
 
 app.use(express.static("public"));
 
@@ -18,7 +19,13 @@ io.on("connection", (socket) => {
 
   socket.on("join-room", (roomId) => {
     socket.join(roomId);
-    socket.to(roomId).emit("user-joined", socket.id);
+    console.log(`User ${socket.id} joined room ${roomId}`);
+
+    const clients = io.sockets.adapter.rooms.get(roomId);
+
+    if (clients && clients.size === 2) {
+      io.to(roomId).emit("ready");
+    }
   });
 
   socket.on("offer", ({ roomId, offer }) => {
@@ -39,7 +46,6 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-
 server.listen(PORT, () => {
   console.log(`LiveAtlas server running on port ${PORT}`);
 });
