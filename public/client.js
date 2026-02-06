@@ -4,7 +4,8 @@ const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
 const statusText = document.getElementById("status");
 
-const roomId = new URLSearchParams(window.location.search).get("room") || "default";
+const roomId =
+  new URLSearchParams(window.location.search).get("room") || "default";
 
 let localStream;
 let peer;
@@ -13,22 +14,21 @@ const rtcConfig = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
 };
 
-window.addEventListener("DOMContentLoaded", start);
-
 async function start() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
       video: {
-  width: { ideal: 1280 },
-  height: { ideal: 720 },
-  frameRate: { ideal: 24 }
-}
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 24 }
+      },
+      audio: true
     });
 
     localVideo.srcObject = localStream;
-    socket.emit("join-room", roomId);
     statusText.innerText = "Camera ready";
 
+    socket.emit("join-room", roomId);
   } catch (err) {
     console.error(err);
     statusText.innerText = "Camera permission failed";
@@ -40,10 +40,9 @@ socket.on("user-joined", async () => {
   await createPeer(true);
 });
 
-socket.on("offer", async ({offer}) => {
+socket.on("offer", async (offer) => {
   await createPeer(false);
-  await peer.setRemoteDescription(new
-    RTCSessionDescription(offer));
+  await peer.setRemoteDescription(new RTCSessionDescription(offer));
 
   const answer = await peer.createAnswer();
   await peer.setLocalDescription(answer);
@@ -52,22 +51,22 @@ socket.on("offer", async ({offer}) => {
 });
 
 socket.on("answer", async (answer) => {
-  await peer.setRemoteDescription(new
-    RTCSessionDescription(answer));
+  await peer.setRemoteDescription(new RTCSessionDescription(answer));
+  statusText.innerText = "Connected";
 });
 
 socket.on("ice-candidate", async (candidate) => {
-  if(peer && candidate){
-  await peer.addIceCandidate(new RTCIceCandidate(candidate));
+  if (peer && candidate) {
+    await peer.addIceCandidate(new RTCIceCandidate(candidate));
   }
 });
 
 async function createPeer(isCaller) {
   peer = new RTCPeerConnection(rtcConfig);
 
-  localStream.getTracks().forEach(track => {
+  localStream.getTracks().forEach((track) => {
     peer.addTrack(track, localStream);
-});
+  });
 
   peer.ontrack = (event) => {
     remoteVideo.srcObject = event.streams[0];
@@ -89,4 +88,4 @@ async function createPeer(isCaller) {
   }
 }
 
-
+start();
