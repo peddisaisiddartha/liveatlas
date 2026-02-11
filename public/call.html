@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="style.css" />
+
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
 </head>
 <body>
 
@@ -16,6 +19,13 @@
   <video id="localVideo" autoplay muted playsinline></video>
 
   <div id="status">Connecting…</div>
+
+  <div id="controls">
+  <button id="muteBtn">🎤</button>
+  <button id="camBtn">📷</button>
+  <button id="fsBtn">⛶</button>
+  <button id="endBtn" class="danger">⏻</button>
+</div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="client.js"></script>

@@ -128,3 +128,40 @@ peer.onnegotiationneeded = async () => {
 }
 
 start();
+
+const muteBtn = document.getElementById("muteBtn");
+const camBtn = document.getElementById("camBtn");
+const fsBtn = document.getElementById("fsBtn");
+const endBtn = document.getElementById("endBtn");
+
+muteBtn.onclick = () => {
+  const audioTrack = localStream?.getAudioTracks()[0];
+  if (!audioTrack) return;
+  audioTrack.enabled = !audioTrack.enabled;
+};
+
+camBtn.onclick = () => {
+  const videoTrack = localStream?.getVideoTracks()[0];
+  if (!videoTrack) return;
+  videoTrack.enabled = !videoTrack.enabled;
+};
+
+fsBtn.onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+};
+
+endBtn.onclick = () => {
+  peer?.close();
+  socket.disconnect();
+  window.location.href = "/";
+};
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("Service Worker Registered"))
+    .catch(err => console.error("SW registration failed", err));
+}
