@@ -10,8 +10,32 @@ const roomId =
 let localStream;
 let peer;
 
-const rtcConfig = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+const rtcConfig={
+  iceServers: [
+      {
+        urls: "stun:stun.relay.metered.ca:80",
+      },
+      {
+        urls: "turn:global.relay.metered.ca:80",
+        username: "a08d7dab4952ac44632adaaa",
+        credential: "4+8LpWBi440BQE2K",
+      },
+      {
+        urls: "turn:global.relay.metered.ca:80?transport=tcp",
+        username: "a08d7dab4952ac44632adaaa",
+        credential: "4+8LpWBi440BQE2K",
+      },
+      {
+        urls: "turn:global.relay.metered.ca:443",
+        username: "a08d7dab4952ac44632adaaa",
+        credential: "4+8LpWBi440BQE2K",
+      },
+      {
+        urls: "turns:global.relay.metered.ca:443?transport=tcp",
+        username: "a08d7dab4952ac44632adaaa",
+        credential: "4+8LpWBi440BQE2K",
+      },
+  ],
 };
 
 async function start() {
