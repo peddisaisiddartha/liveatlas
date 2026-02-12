@@ -174,20 +174,27 @@ if ("serviceWorker" in navigator) {
 }
 
 async function switchCamera() {
-  currentFacingMode =
-    currentFacingMode === "user" ? "environment" : "user";
+    currentFacingMode =
+        currentFacingMode === "user" ? "environment" : "user";
 
-  if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
-  }
+    const newStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: currentFacingMode },
+        audio: true
+    });
 
-  await start();
+    const newVideoTrack = newStream.getVideoTracks()[0];
 
-  if (peer && localStream) {
-    const videoTrack = localStream.getVideoTracks()[0];
-    const sender = peer.getSenders().find(s => s.track.kind === "video");
-    if (sender) {
-      sender.replaceTrack(videoTrack);
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
     }
-  }
+
+    localStream = newStream;
+    localVideo.srcObject = localStream;
+
+    if (peer) {
+        const sender = peer.getSenders().find(s => s.track && s.track.kind === "video");
+        if (sender) {
+            sender.replaceTrack(newVideoTrack);
+        }
+    }
 }
