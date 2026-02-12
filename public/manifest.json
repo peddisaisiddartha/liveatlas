@@ -1,7 +1,7 @@
 {
   "name": "LiveAtlas",
   "short_name": "LiveAtlas",
-  "start_url": "/",
+  "start_url": "/call.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
