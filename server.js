@@ -13,7 +13,7 @@ app.get("/health", (req,res)=>{
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/call.html");
+res.sendFile(__dirname+ "/public/index.html");
 });
 
 io.on("connection", (socket) => {

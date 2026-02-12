@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiveAtlas</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="home-container">
+    <h1>LiveAtlas</h1>
+    <p>Be Anywhere. Live.</p>
+
+    <input type="text" id="roomInput" placeholder="Enter Room ID" />
+    <button id="joinBtn">Join Room</button>
+  </div>
+
+  <script>
+    document.getElementById("joinBtn").onclick = () => {
+      const room = document.getElementById("roomInput").value || "default";
+      window.location.href = "/call.html?room=" + room;
+    };
+  </script>
+
+</body>
+</html>

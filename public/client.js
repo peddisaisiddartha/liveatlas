@@ -46,7 +46,6 @@ async function start() {
         facingMode: currentFacingMode,
         width: { ideal: 1280 },
         height: { ideal: 720 },
-        frameRate: { ideal: 24 }
       },
       audio: true
     });
@@ -187,24 +186,40 @@ if ("serviceWorker" in navigator) {
 }
 
 async function switchCamera() {
-    currentFacingMode =
-        currentFacingMode === "user" ? "environment" : "user";
 
+  // toggle camera mode
+  currentFacingMode =
+    currentFacingMode === "user" ? "environment" : "user";
+
+  try {
     const newStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: currentFacingMode },
-        audio: true
+      video: {
+        facingMode: { exact: currentFacingMode }
+      },
+      audio: false
     });
 
     const newVideoTrack = newStream.getVideoTracks()[0];
 
+    // Replace preview
+    localVideo.srcObject = newStream;
+
+    // Replace track in peer connection
     if (peer) {
-        const sender = peer.getSenders().find(s => s.track && s.track.kind === "video");
-        if (sender) {
-            sender.replaceTrack(newVideoTrack);
-        }
+      const sender = peer.getSenders().find(s => s.track.kind === "video");
+      if (sender) {
+        sender.replaceTrack(newVideoTrack);
+      }
     }
 
+    // Stop old stream tracks
     localStream.getTracks().forEach(track => track.stop());
+
+    // Update localStream reference
     localStream = newStream;
-    localVideo.srcObject = newStream;
+
+  } catch (err) {
+    console.error("Camera switch failed:", err);
+  }
 }
+

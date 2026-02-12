@@ -1,7 +1,7 @@
-const CACHE_NAME = "liveatlas-v1";
+const CACHE_NAME = "liveatlas-v2";
 
 const urlsToCache = [
-  "/",
+  "/index.html",
   "/call.html",
   "/style.css",
   "/client.js",

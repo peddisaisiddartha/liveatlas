@@ -27,7 +27,7 @@ html, body {
 /* ============================= */
 #localVideo {
 
-  display:none;
+  display:none;s
 }
 
 /* ============================= */
@@ -76,4 +76,89 @@ html, body {
 
 #controls button:active {
   transform: scale(0.95);
+}
+
+#splash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #0f2027, #000000);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #00f0ff;
+  font-family: 'Segoe UI', sans-serif;
+  z-index: 9999;
+  animation: fadeOut 1s ease 1.5s forwards;
+}
+
+#splash h1 {
+  font-size: 3rem;
+  letter-spacing: 3px;
+  text-shadow: 0 0 15px #00f0ff;
+}
+
+#splash p {
+  margin-top: 10px;
+  opacity: 0.7;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* ===== HOME SCREEN ===== */
+
+.home-container {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #0f2027, #000000);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #00f0ff;
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+}
+
+.home-container h1 {
+  font-size: 3rem;
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+  text-shadow: 0 0 15px #00f0ff;
+}
+
+.home-container p {
+  opacity: 0.7;
+  margin-bottom: 30px;
+}
+
+.home-container input {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  font-size: 16px;
+  margin-bottom: 15px;
+  width: 220px;
+  text-align: center;
+}
+
+.home-container button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #00f0ff;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.home-container button:hover {
+  transform: scale(1.05);
 }
