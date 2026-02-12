@@ -138,6 +138,7 @@ start();
 
 const muteBtn = document.getElementById("muteBtn");
 const camBtn = document.getElementById("camBtn");
+const switchCamBtn = document.getElementById("switchCamera");
 const fsBtn = document.getElementById("fsBtn");
 const endBtn = document.getElementById("endBtn");
 
@@ -159,6 +160,18 @@ fsBtn.onclick = () => {
   } else {
     document.exitFullscreen();
   }
+
+  fsBtn.onclick = () => {
+   if (!document.fullscreenElement) {
+       document.documentElement.requestFullscreen();
+   } else {
+       document.exitFullscreen();
+   }
+};
+
+switchCamBtn.onclick = () => {
+    switchCamera();
+};
 };
 
 endBtn.onclick = () => {
@@ -184,17 +197,14 @@ async function switchCamera() {
 
     const newVideoTrack = newStream.getVideoTracks()[0];
 
-    if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-    }
-
-    localStream = newStream;
-    localVideo.srcObject = localStream;
-
     if (peer) {
         const sender = peer.getSenders().find(s => s.track && s.track.kind === "video");
         if (sender) {
             sender.replaceTrack(newVideoTrack);
         }
     }
+
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = newStream;
+    localVideo.srcObject = newStream;
 }
