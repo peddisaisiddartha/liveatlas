@@ -9,32 +9,33 @@ const roomId =
 
 let localStream;
 let peer;
+let currentFacingMode = "user";
 
-const rtcConfig={
+const rtcConfig = {
   iceServers: [
-      {
-        urls: "stun:stun.relay.metered.ca:80",
-      },
-      {
-        urls: "turn:global.relay.metered.ca:80",
-        username: "a08d7dab4952ac44632adaaa",
-        credential: "4+8LpWBi440BQE2K",
-      },
-      {
-        urls: "turn:global.relay.metered.ca:80?transport=tcp",
-        username: "a08d7dab4952ac44632adaaa",
-        credential: "4+8LpWBi440BQE2K",
-      },
-      {
-        urls: "turn:global.relay.metered.ca:443",
-        username: "a08d7dab4952ac44632adaaa",
-        credential: "4+8LpWBi440BQE2K",
-      },
-      {
-        urls: "turns:global.relay.metered.ca:443?transport=tcp",
-        username: "a08d7dab4952ac44632adaaa",
-        credential: "4+8LpWBi440BQE2K",
-      },
+    {
+      urls: "stun:stun.relay.metered.ca:80",
+    },
+    {
+      urls: "turn:global.relay.metered.ca:80",
+      username: "a08d7dab4952ac44632adaaa",
+      credential: "4+8LpWBi440BQE2K",
+    },
+    {
+      urls: "turn:global.relay.metered.ca:80?transport=tcp",
+      username: "a08d7dab4952ac44632adaaa",
+      credential: "4+8LpWBi440BQE2K",
+    },
+    {
+      urls: "turn:global.relay.metered.ca:443",
+      username: "a08d7dab4952ac44632adaaa",
+      credential: "4+8LpWBi440BQE2K",
+    },
+    {
+      urls: "turns:global.relay.metered.ca:443?transport=tcp",
+      username: "a08d7dab4952ac44632adaaa",
+      credential: "4+8LpWBi440BQE2K",
+    },
   ],
 };
 
@@ -42,6 +43,7 @@ async function start() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
       video: {
+        facingMode: currentFacingMode,
         width: { ideal: 1280 },
         height: { ideal: 720 },
         frameRate: { ideal: 24 }
@@ -85,23 +87,28 @@ socket.on("ice-candidate", async (candidate) => {
   }
 });
 
+socket.on("room-full", () => {
+  alert("Room is full. Only 2 users allowed.");
+  document.getElementById("status").innerText = "Room Full";
+});
+
 async function createPeer(isCaller) {
   peer = new RTCPeerConnection(rtcConfig);
 
   // 🔒 Lock video bitrate for better quality
-peer.onnegotiationneeded = async () => {
-  const sender = peer.getSenders().find(
-    s => s.track && s.track.kind === "video"
-  );
+  peer.onnegotiationneeded = async () => {
+    const sender = peer.getSenders().find(
+      s => s.track && s.track.kind === "video"
+    );
 
-  if (sender) {
-    const params = sender.getParameters();
-    if (!params.encodings) params.encodings = [{}];
+    if (sender) {
+      const params = sender.getParameters();
+      if (!params.encodings) params.encodings = [{}];
 
-    params.encodings[0].maxBitrate = 2_500_000; // 2.5 Mbps (720p stable)
-    await sender.setParameters(params);
-  }
-};
+      params.encodings[0].maxBitrate = 2_500_000; // 2.5 Mbps (720p stable)
+      await sender.setParameters(params);
+    }
+  };
 
   localStream.getTracks().forEach((track) => {
     peer.addTrack(track, localStream);
@@ -164,4 +171,23 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js")
     .then(() => console.log("Service Worker Registered"))
     .catch(err => console.error("SW registration failed", err));
+}
+
+async function switchCamera() {
+  currentFacingMode =
+    currentFacingMode === "user" ? "environment" : "user";
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+  }
+
+  await start();
+
+  if (peer && localStream) {
+    const videoTrack = localStream.getVideoTracks()[0];
+    const sender = peer.getSenders().find(s => s.track.kind === "video");
+    if (sender) {
+      sender.replaceTrack(videoTrack);
+    }
+  }
 }

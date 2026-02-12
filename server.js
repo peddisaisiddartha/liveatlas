@@ -20,9 +20,20 @@ io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
   socket.on("join-room", (roomId) => {
-    socket.join(roomId);
-    socket.to(roomId).emit("user-joined");
-  });
+  const room = io.sockets.adapter.rooms.get(roomId);
+  const roomSize = room ? room.size : 0;
+
+  console.log("Room:", roomId, "Size:", roomSize);
+
+  if (roomSize >= 2) {
+    console.log("Room is full. Rejecting user:", socket.id);
+    socket.emit("room-full");
+    return;
+  }
+
+  socket.join(roomId);
+  socket.to(roomId).emit("user-joined", socket.id);
+});
 
   socket.on("offer", ({ roomId, offer }) => {
     socket.to(roomId).emit("offer", offer);
